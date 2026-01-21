@@ -11,4 +11,4 @@ Un bash script para ver animes sub español desde tu terminal usando mpv
 Clone el repositorio git `` y conceda permisos de ejecucion ``
 
 ## Interfaz CLI
-[interfaz](https://github.com/IamJony/semi-nord-theme-bluefish/blob/main/interfaz%20a%20cli.png?raw=true)
+[interfaz](https://github.com/IamJony/semi-nord-theme-bluefish/blob/main/interfaz%20a%20cli.png?raw=true).
