@@ -1,5 +1,5 @@
 #!/bin/bash
-# anime-cli.sh - Interfaz CLI para A-CLI by IamJony
+# A-CLI.sh - Interfaz CLI para A-CLI by IamJony
 # Flujo: Buscar -> Ver capítulos -> Seleccionar capítulo -> Servidores -> M3U8 -> MPV
 
 # Colores básicos
