@@ -11,7 +11,7 @@ API_CHAPTERS="$BASE_URL/ajax/episodes"
 USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:146.0) Gecko/20100101 Firefox/146.0"
 
 # Archivos temporales 
-TEMP_DIR="/tmp/A-CLI"
+TEMP_DIR="/tmp/TEMP_A-CLI"
 COOKIE_FILE="$TEMP_DIR/cookies.txt"
 TOKEN_FILE="$TEMP_DIR/tokens.txt"
 TEMP_HTML="$TEMP_DIR/last_page.html"
