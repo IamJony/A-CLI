@@ -22,39 +22,47 @@ mkdir -p "$TEMP_DIR" 2>/dev/null
 # Variables globales
 CSRF_TOKEN=""
 
-# Función para obtener cookies y token
-get_cookies_and_token() {
-    # echo "Obteniendo cookies y token CSRF..."
+# Verificar si cookies y token son válidos (max 30 minutos)
+verify_cookies() {
+    [ ! -f "$COOKIE_FILE" ] && return 1
+    [ ! -f "$TOKEN_FILE" ] && return 1
+    [ ! -s "$COOKIE_FILE" ] && return 1
     
-    # Descargar página principal
-    curl -s -c "$COOKIE_FILE" "$BASE_URL" \
-        -H "User-Agent: $USER_AGENT" \
-        -o "$TEMP_HTML"
+    # Verificar antigüedad del archivo (1800 segundos = 30 minutos)
+    local file_time=$(stat -c %Y "$COOKIE_FILE" 2>/dev/null || echo 0)
+    local current_time=$(date +%s)
+    local age=$((current_time - file_time))
     
-    # Extraer token CSRF del HTML
-    CSRF_TOKEN=$(grep -o 'name="csrf-token" content="[^"]*"' "$TEMP_HTML" | \
-                 sed 's/.*content="//;s/"//')
+    [ $age -gt 1800 ] && return 1
     
-    # Guardar token
+    source "$TOKEN_FILE" 2>/dev/null
+    [ -z "$CSRF_TOKEN" ] && return 1
+    
+    return 0
+}
+
+# Obtener nuevas cookies y token
+get_cookies() {
+    curl -s -c "$COOKIE_FILE" "$BASE_URL" -H "User-Agent: $USER_AGENT" -o "$TEMP_HTML"
+    
+    CSRF_TOKEN=$(grep -o 'name="csrf-token" content="[^"]*"' "$TEMP_HTML" | sed 's/.*content="//;s/"//')
+    
     if [ -n "$CSRF_TOKEN" ]; then
         echo "CSRF_TOKEN=$CSRF_TOKEN" > "$TOKEN_FILE"
-        #echo "Token obtenido: ${CSRF_TOKEN:0:10}..."
-    else
-        echo "Error: No se pudo extraer token CSRF"
     fi
 }
 
-# Cargar token si existe
+# Cargar token
 load_token() {
-    if [ -f "$TOKEN_FILE" ]; then
-        source "$TOKEN_FILE"
-    fi
+    [ -f "$TOKEN_FILE" ] && source "$TOKEN_FILE"
 }
 
-# Verificar y actualizar token si es necesario
+# Verificar y obtener cookies solo si es necesario
 check_token() {
-    if [ ! -f "$TOKEN_FILE" ] || [ -z "$CSRF_TOKEN" ]; then
-        get_cookies_and_token
+    if verify_cookies; then
+        load_token
+    else
+        get_cookies
     fi
 }
 

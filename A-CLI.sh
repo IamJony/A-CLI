@@ -38,6 +38,65 @@ menu_principal() {
     echo -n "Selecciona: "
 }
 
+# Generar historial de busqueda y reproduccion
+generar_historial_busqueda() {
+    local slug="$1"
+    local titulo="$2"
+    local total_capitulos="$3"
+    local capitulo_visto="$4"
+    local historial="/home/j/historial.json"
+
+    # Verificar si el título está vacío
+    if [ -z "$titulo" ]; then
+        return 0
+    fi
+
+    # Si el archivo no existe, crearlo con el primer objeto
+    if [ ! -f "$historial" ]; then
+        cat > "$historial" << EOF
+{
+    "titulo": "$titulo",
+    "slug": "$slug",
+    "total_capitulos": "$total_capitulos",
+    "capitulo_visto": "$capitulo_visto",
+    "favorito": "$favorito"
+}
+EOF
+    else
+        # Si el archivo existe, agregar un nuevo objeto
+        cat >> "$historial" << EOF
+
+{
+    "titulo": "$titulo",
+    "slug": "$slug",
+    "total_capitulos": "$total_capitulos",
+    "capitulo_visto": "$capitulo_visto",
+    "favorito": "$favorito"
+}
+EOF
+    fi
+
+    return 0
+}
+
+# Generar lista de favoritos
+generar_favoritos() {
+    local slug="$1"
+    local titulo="$2"
+    local total_capitulos="$3"
+    local capitulo_visto="$4"
+    
+    # Crear objeto JSON correctamente formateado
+    cat > "/home/j/favoritos.json" << EOF
+{
+    "titulo": "$titulo",
+    "slug": "$slug",
+    "total_capitulos": "$total_capitulos",
+    "capitulo_visto": "$capitulo_visto"
+}
+EOF
+}
+
 # Buscar anime
 buscar_anime() {
     echo ""
@@ -136,6 +195,9 @@ buscar_anime() {
     
     echo ""
     echo -e "${GREEN}Total de capítulos encontrados: $total_capitulos${NC}"
+
+    # Generar historial de busqueda
+    generar_historial_busqueda "$anime_slug" "$anime_title" "$total_capitulos"
     
     # Llamar a la función para seleccionar capítulo
     seleccionar_capitulo "$anime_slug" "$anime_title" "$total_capitulos"
@@ -159,7 +221,7 @@ seleccionar_capitulo() {
         echo "──────────────────────────────────"
         echo -e "${YELLOW}Opciones:${NC}"
         echo "  0. Volver al menú principal"
-        echo "  99. Buscar otro anime"
+        echo "  00. Buscar otro anime"
         echo "  número. Reproducir capítulo específico"
         echo ""
         echo -n "¿Qué capítulo quieres ver? (1-$total_capitulos): "
@@ -170,7 +232,7 @@ seleccionar_capitulo() {
                 # Volver al menú principal
                 return 0
                 ;;
-            99)
+            00)
                 # Volver a buscar
                 return 1
                 ;;
@@ -184,7 +246,7 @@ seleccionar_capitulo() {
                 sleep 1
                 continue
                 ;;
-            *)
+        *)
                 # Validar capítulo
                 if [ "$capitulo" -lt 1 ] || [ "$capitulo" -gt "$total_capitulos" ]; then
                     echo -e "${RED}Capitulo invalido (rango: 1-$total_capitulos)${NC}"
@@ -192,10 +254,36 @@ seleccionar_capitulo() {
                     continue
                 fi
                 
-                # Reproducir el capítulo seleccionado
-                reproducir_anime "$slug" "$titulo" "$capitulo"
+                # Preguntar si quiere usar mpv
+                echo ""
+                echo -n "¿Quieres reproducir automaticamente con mpv? (s/n): "
+                read usar_mpv
                 
-                # Preguntar si quiere ver otro capítulo del mismo anime
+                if [[ "$usar_mpv" =~ ^[Ss]$ ]]; then
+                    echo -e "${GREEN}✓ Se reproducirá automaticamente con mpv${NC}"
+                    reproducir_anime "$slug" "$titulo" "$capitulo"
+             
+                else
+                  echo -e "${YELLOW}✓ No se reproducirá automaticamente${NC}"
+                  url="$BASE_URL/$slug/$capitulo/"
+                  curl -s -b "$COOKIE_FILE" -A "$USER_AGENT" "$url" > "$TEMP_DIR/anime.html"
+                  
+                  if [ $? -ne 0 ]; then
+        echo -e "${RED}Error al descargar la página${NC}"
+        return 1
+    fi
+
+    echo -e "${YELLOW}Extrayendo servidores...${NC}"
+    ./servers.sh
+             
+                    echo ""
+                    echo "Puedes consultar los servidores manualmente:"
+                    echo -e "${CYAN}cat /tmp/TEMP_A-CLI/servers.json | jq .${NC}"
+                    echo ""
+                fi
+                
+          
+              
                 echo ""
                 echo -n "¿Ver otro capítulo de $titulo? (s/n): "
                 read respuesta
@@ -203,6 +291,7 @@ seleccionar_capitulo() {
                     return 0
                 fi
                 ;;
+                
         esac
     done
 }
@@ -228,6 +317,8 @@ reproducir_anime() {
     echo ""
     echo -e "${GREEN}Anime: $titulo${NC}"
     echo -e "${GREEN}Capitulo: $capitulo${NC}"
+
+    
     
     # Construir URL del capítulo
     url="$BASE_URL/$slug/$capitulo/"
