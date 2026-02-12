@@ -16,9 +16,9 @@ Clone el repositorio git `https://github.com/IamJony/A-CLI.git` y conceda permis
 ## LISTA DE TAREAS - A-CLI
 - [ ] Agregar opción para descargar videos
 - [ ] Reproducir directamente desde URL
-- [ ] IMPLEMENTAR SISTEMA DE HISTORIAL DE BUSQUEDA
-- [ ] IMPLEMENTAR SISTEMA DE MANEJO DE ERRORES
-- [ ] CREAR UNA DOCUMENTACION 
+- [ ] Implementar sistema de manejo de historial de busqueda
+- [ ] Implementar sistema de manejo de errores
+- [ ] Crear una documentacion solida
 
 ## ESTADO ACTUAL - A-CLI
 - **Última actualización:** <!-- 12-02-2026 -->
