@@ -21,6 +21,6 @@ Clone el repositorio git `https://github.com/IamJony/A-CLI.git` y conceda permis
 - [ ] Crear una documentacion solida
 
 ## ESTADO ACTUAL - A-CLI
-- **Última actualización:** <!-- 12-02-2026 -->
+- **Última actualización:** 12-02-2026
 - **Versión:** 1.1
 - **Progreso general:** ■□□□□ 20%
