@@ -1,5 +1,5 @@
 # A-CLI
-Un bash script para ver animes sub español desde tu terminal usando mpv
+Un bash script para ver animes sub español desde tu terminal usando mpv.
 
 ## Dependencias
 1. mpv
