@@ -10,12 +10,15 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Obtener directorio base donde está A-CLI.sh
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Cargar configuración
-if [ ! -f "config.sh" ]; then
-    echo -e "${RED}Error: No se encuentra config.sh${NC}"
+if [ ! -f "$BASE_DIR/modules/config.sh" ]; then
+    echo -e "${RED}Error: No se encuentra $BASE_DIR/modules/config.sh${NC}"
     exit 1
 fi
-source config.sh
+source "$BASE_DIR/modules/config.sh"
 
 # Crear directorio temporal
 mkdir -p "$TEMP_DIR"
@@ -44,7 +47,7 @@ generar_historial_busqueda() {
     local titulo="$2"
     local total_capitulos="$3"
     local capitulo_visto="$4"
-    local historial="/home/j/historial.json"
+    local historial="$HOME/historial.json"
 
     # Verificar si el título está vacío
     if [ -z "$titulo" ]; then
@@ -87,7 +90,7 @@ generar_favoritos() {
     local capitulo_visto="$4"
     
     # Crear objeto JSON correctamente formateado
-    cat > "/home/j/favoritos.json" << EOF
+    cat > "$HOME/favoritos.json" << EOF
 {
     "titulo": "$titulo",
     "slug": "$slug",
@@ -116,7 +119,8 @@ buscar_anime() {
     echo -e "${GREEN}Buscando...${NC}"
     
     # Ejecutar búsqueda
-    ./search.sh "$nombre"
+
+	"$BASE_DIR/modules/search.sh" "$nombre"
     
     if [ ! -f "$TEMP_DIR/search.json" ] || [ ! -s "$TEMP_DIR/search.json" ]; then
         echo -e "${RED}No se encontraron resultados${NC}"
@@ -185,7 +189,7 @@ buscar_anime() {
     echo ""
     echo -e "${YELLOW}Consultando capítulos disponibles...${NC}"
     
-    total_capitulos=$(./chapters.sh "$anime_id" 1)
+    total_capitulos=$("$BASE_DIR/modules/chapters.sh" "$anime_id" 1)
     
     if [ $? -ne 0 ] || [ -z "$total_capitulos" ]; then
         echo -e "${RED}Error al obtener capítulos${NC}"
@@ -274,11 +278,11 @@ seleccionar_capitulo() {
     fi
 
     echo -e "${YELLOW}Extrayendo servidores...${NC}"
-    ./servers.sh
+    "$BASE_DIR/modules/servers.sh"
              
                     echo ""
                     echo "Puedes consultar los servidores manualmente:"
-                    echo -e "${CYAN}cat /tmp/TEMP_A-CLI/servers.json | jq .${NC}"
+                    echo -e "${CYAN}cat $TEMP_DIR/servers.json | jq .${NC}"
                     echo ""
                 fi
                 
@@ -334,7 +338,7 @@ reproducir_anime() {
     
     # 2. Extraer servidores (videos embebidos)
     echo -e "${YELLOW}Extrayendo servidores...${NC}"
-    ./servers.sh
+    "$BASE_DIR/modules/servers.sh"
     
     if [ $? -ne 0 ] || [ ! -f "$TEMP_DIR/servers.json" ]; then
         echo -e "${RED}Error al extraer servidores${NC}"
@@ -351,7 +355,7 @@ reproducir_anime() {
     # 3. Extraer M3U8 del primer servidor
     echo ""
     echo -e "${YELLOW}Extrayendo video M3U8...${NC}"
-    ./m3u8.sh "$primer_servidor"
+    "$BASE_DIR/modules/m3u8.sh" "$primer_servidor"
     
     if [ $? -ne 0 ] || [ ! -f "$TEMP_DIR/stream.m3u8" ] || [ ! -s "$TEMP_DIR/stream.m3u8" ]; then
         echo -e "${RED}Error al extraer video M3U8${NC}"
@@ -414,7 +418,6 @@ while true; do
             ;;
         2)
             echo -e "${YELLOW}Opcion disponible para futuras versiones :("
-            
             ;;
         3)
             echo ""
