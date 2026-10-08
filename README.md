@@ -1,6 +1,6 @@
 # A-CLI
+
 Un bash script para ver animes sub español desde tu terminal usando mpv.
----
 
 ## ESTADO ACTUAL - A-CLI
 * **Última actualización:** 12-02-2026
