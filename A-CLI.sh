@@ -1,6 +1,7 @@
 #!/bin/bash
 # A-CLI.sh - Interfaz CLI para A-CLI by IamJony
 # Flujo: Buscar -> Ver capítulos -> Seleccionar capítulo -> Servidores -> M3U8 -> MPV
+# Probado: 08-Octubre-2026 - Status Ok
 
 # Colores básicos
 RED='\033[0;31m'
