@@ -25,7 +25,7 @@ chmod +x A-CLI.sh ./modules/*
 ---
 
 ## Interfaz CLI
-![interfaz](https://github.com)
+![interfaz](https://github.com/IamJony/semi-nord-theme-bluefish/blob/main/interfaz%20a%20cli.png?raw=true)
 
 ---
 
