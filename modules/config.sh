@@ -1,9 +1,12 @@
 #!/bin/bash
+
 # Configuracion inicial de A-CLI by IamJony
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UTIL="$SCRIPT_DIR/util.sh"
+source "$UTIL"
 
 # URLs base
-BASE64_BASE_URL="aHR0cHM6Ly9qa2FuaW1lLm5ldA=="
-BASE_URL=$(echo "$BASE64_BASE_URL" | base64 -d)
+BASE_URL=$(d "66 94 94 90 89 16 5 5 64 65 75 68 67 71 79 4 68 79 94")
 API_SEARCH="$BASE_URL/ajax_search"
 API_CHAPTERS="$BASE_URL/ajax/episodes"
 
