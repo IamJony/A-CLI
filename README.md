@@ -35,13 +35,5 @@ chmod +x A-CLI.sh ./modules/*
 
 ---
 
-## LISTA DE TAREAS - A-CLI
-- [ ] Agregar opción para descargar videos
-- [ ] Reproducir directamente desde URL
-- [ ] Implementar sistema de manejo de historial de busqueda
-- [ ] Implementar sistema de manejo de errores
-- [ ] Crear una documentacion solida
-
----
 
 
