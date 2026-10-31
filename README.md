@@ -1,11 +1,11 @@
 # A-CLI
 
-Un bash script para ver animes sub español desde tu terminal usando mpv.
+Un bash script para ver animes sub español desde tu terminal usando mpv o mplayer, compatible con FLINUX Y TINYCORE.
 
 ## ESTADO ACTUAL - A-CLI
-* **Última actualización:** 12-02-2026
+* **Última actualización:** 31-10-2026
 * **Versión:** 1.1
-* **Compatibilidad:** Verificado y operativo al **08-10-2026**.
+* **Compatibilidad:** Verificado y operativo al **31-10-2026**.
 
 
 
