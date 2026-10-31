@@ -1,8 +1,9 @@
 #!/bin/bash
 # search.sh - Búsqueda 
 
-# Cargar configuración
-source ./modules/config.sh 2>/dev/null || {
+
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SOURCE_DIR/config.sh" || {
     echo "Error: No se encuentra config.sh"
     exit 1
 }

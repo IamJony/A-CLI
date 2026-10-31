@@ -1,5 +1,11 @@
 #!/bin/bash
 # A-CLI.sh - Interfaz CLI para A-CLI by IamJony
+# Adaptado para Tiny Core Linux: solo ASCII, wget en lugar de curl,
+# printf en lugar de echo -e.
+
+# Locale seguro: Tiny Core suele no tener UTF-8 completo
+export LANG=C
+export LC_ALL=C
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -11,56 +17,61 @@ NC='\033[0m'
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ ! -f "$BASE_DIR/modules/config.sh" ]; then
-    echo -e "${RED}Error: No se encuentra $BASE_DIR/modules/config.sh${NC}"
+    printf '%b\n' "${RED}Error: No se encuentra $BASE_DIR/modules/config.sh${NC}"
     exit 1
 fi
 source "$BASE_DIR/modules/config.sh"
 
 mkdir -p "$TEMP_DIR"
 
+# Helper: imprime una linea horizontal ASCII
+hr() {
+    printf '%s\n' "----------------------------------------"
+}
+
 menu_principal() {
     clear
-    echo -e "${CYAN}╔════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║             ${YELLOW}A-CLI v1.0${CYAN}                 ║${NC}"
-    echo -e "${CYAN}║    ${BLUE}https://github.com/IamJony${CYAN}   ║${NC}"
-    echo -e "${CYAN}╚════════════════════════════════════════╝${NC}"
+    printf '%b\n' "${CYAN}+----------------------------------------+${NC}"
+    printf '%b\n' "${CYAN}|             ${YELLOW}A-CLI v1.0${CYAN}                 |${NC}"
+    printf '%b\n' "${CYAN}|    ${BLUE}https://github.com/IamJony${CYAN}       |${NC}"
+    printf '%b\n' "${CYAN}+----------------------------------------+${NC}"
     echo ""
-    echo -e "${GREEN}[1] Buscar anime${NC}"
-    echo -e "${GREEN}[2] Reproducir desde URL${NC}"
-    echo -e "${GREEN}[3] Salir${NC}"
-    echo -e "${GREEN}[4] Eliminar Archivos Temporales${NC}"
+    printf '%b\n' "${GREEN}[1] Buscar anime${NC}"
+    printf '%b\n' "${GREEN}[2] Reproducir desde URL${NC}"
+    printf '%b\n' "${GREEN}[3] Salir${NC}"
+    printf '%b\n' "${GREEN}[4] Eliminar archivos temporales${NC}"
     echo ""
-    echo -n "Selecciona: "
+    printf '%s' "Selecciona: "
 }
 
 buscar_anime() {
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${YELLOW}BUSCAR ANIME${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    hr
+    printf '%b\n' "${YELLOW}BUSCAR ANIME${NC}"
+    hr
     echo ""
-    echo -n "Nombre del anime: "
+    printf '%s' "Nombre del anime: "
     read nombre
 
     if [ -z "$nombre" ]; then
-        echo -e "${RED}No ingresaste nada${NC}"
+        printf '%b\n' "${RED}No ingresaste nada${NC}"
         sleep 2
         return 1
     fi
 
-    echo -e "${GREEN}Buscando...${NC}"
+    printf '%b\n' "${GREEN}Buscando...${NC}"
 
     "$BASE_DIR/modules/search.sh" "$nombre"
 
     if [ ! -f "$TEMP_DIR/search.json" ] || [ ! -s "$TEMP_DIR/search.json" ]; then
-        echo -e "${RED}No se encontraron resultados${NC}"
+        printf '%b\n' "${RED}No se encontraron resultados${NC}"
         sleep 2
         return 1
     fi
 
     echo ""
-    echo -e "${YELLOW}Resultados encontrados:${NC}"
-    echo "════════════════════════════════════"
+    printf '%b\n' "${YELLOW}Resultados encontrados:${NC}"
+    printf '%s\n' "========================================"
 
     if command -v jq &> /dev/null; then
         total_resultados=$(jq '. | length' "$TEMP_DIR/search.json")
@@ -70,11 +81,11 @@ buscar_anime() {
         grep '"title":' "$TEMP_DIR/search.json" | sed 's/.*"title": "//;s/".*//' | cat -n
     fi
 
-    echo "════════════════════════════════════"
-    echo -e "${GREEN}Total: $total_resultados resultados${NC}"
+    printf '%s\n' "========================================"
+    printf '%b\n' "${GREEN}Total: $total_resultados resultados${NC}"
     echo ""
 
-    echo -n "Selecciona un anime (0 para cancelar): "
+    printf '%s' "Selecciona un anime (0 para cancelar): "
     read seleccion
 
     if [ "$seleccion" = "0" ] || [ -z "$seleccion" ]; then
@@ -82,7 +93,7 @@ buscar_anime() {
     fi
 
     if [ "$seleccion" -lt 1 ] || [ "$seleccion" -gt "$total_resultados" ]; then
-        echo -e "${RED}Seleccion invalida${NC}"
+        printf '%b\n' "${RED}Seleccion invalida${NC}"
         sleep 2
         return 1
     fi
@@ -99,27 +110,27 @@ buscar_anime() {
     fi
 
     if [ -z "$anime_slug" ]; then
-        echo -e "${RED}Error al obtener información del anime${NC}"
+        printf '%b\n' "${RED}Error al obtener informacion del anime${NC}"
         sleep 2
         return 1
     fi
 
-    echo -e "${GREEN}Seleccionado: $anime_title${NC}"
-    echo -e "${GREEN}ID: $anime_id${NC}"
+    printf '%b\n' "${GREEN}Seleccionado: $anime_title${NC}"
+    printf '%b\n' "${GREEN}ID: $anime_id${NC}"
 
     echo ""
-    echo -e "${YELLOW}Consultando capítulos disponibles...${NC}"
+    printf '%b\n' "${YELLOW}Consultando capitulos disponibles...${NC}"
 
     total_capitulos=$("$BASE_DIR/modules/chapters.sh" "$anime_id" 1)
 
     if [ $? -ne 0 ] || [ -z "$total_capitulos" ]; then
-        echo -e "${RED}Error al obtener capítulos${NC}"
+        printf '%b\n' "${RED}Error al obtener capitulos${NC}"
         sleep 2
         return 1
     fi
 
     echo ""
-    echo -e "${GREEN}Total de capítulos encontrados: $total_capitulos${NC}"
+    printf '%b\n' "${GREEN}Total de capitulos encontrados: $total_capitulos${NC}"
 
     seleccionar_capitulo "$anime_slug" "$anime_title" "$total_capitulos"
 }
@@ -131,20 +142,20 @@ seleccionar_capitulo() {
 
     while true; do
         clear
-        echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo -e "${YELLOW}SELECCIONAR CAPÍTULO${NC}"
-        echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        hr
+        printf '%b\n' "${YELLOW}SELECCIONAR CAPITULO${NC}"
+        hr
         echo ""
-        echo -e "${GREEN}Anime: $titulo${NC}"
-        echo -e "${GREEN}Total de capítulos: $total_capitulos${NC}"
+        printf '%b\n' "${GREEN}Anime: $titulo${NC}"
+        printf '%b\n' "${GREEN}Total de capitulos: $total_capitulos${NC}"
         echo ""
-        echo "──────────────────────────────────"
-        echo -e "${YELLOW}Opciones:${NC}"
-        echo "  0. Volver al menú principal"
+        printf '%s\n' "--------------------------------------"
+        printf '%b\n' "${YELLOW}Opciones:${NC}"
+        echo "  0. Volver al menu principal"
         echo "  00. Buscar otro anime"
-        echo "  número. Reproducir capítulo específico"
+        echo "  numero. Reproducir capitulo especifico"
         echo ""
-        echo -n "¿Qué capítulo quieres ver? (1-$total_capitulos): "
+        printf '%s' "Que capitulo quieres ver? (1-$total_capitulos): "
         read capitulo
 
         case "$capitulo" in
@@ -155,50 +166,51 @@ seleccionar_capitulo() {
                 return 1
                 ;;
             "")
-                echo -e "${RED}No ingresaste nada${NC}"
+                printf '%b\n' "${RED}No ingresaste nada${NC}"
                 sleep 1
                 continue
                 ;;
             *[!0-9]*)
-                echo -e "${RED}Ingresa solo números${NC}"
+                printf '%b\n' "${RED}Ingresa solo numeros${NC}"
                 sleep 1
                 continue
                 ;;
             *)
                 if [ "$capitulo" -lt 1 ] || [ "$capitulo" -gt "$total_capitulos" ]; then
-                    echo -e "${RED}Capitulo invalido (rango: 1-$total_capitulos)${NC}"
+                    printf '%b\n' "${RED}Capitulo invalido (rango: 1-$total_capitulos)${NC}"
                     sleep 1
                     continue
                 fi
 
                 echo ""
-                echo -n "¿Quieres reproducir automaticamente? (s/n): "
+                printf '%s' "Quieres reproducir automaticamente? (s/n): "
                 read autoplay
 
                 if [[ "$autoplay" =~ ^[Ss]$ ]]; then
-                    echo -e "${GREEN}✓ Se reproducirá automaticamente con mpv${NC}"
+                    printf '%b\n' "${GREEN}[OK] Se reproducira automaticamente con mpv${NC}"
                     reproducir_anime "$slug" "$titulo" "$capitulo"
                 else
-                    echo -e "${YELLOW}✓ No se reproducirá automaticamente${NC}"
+                    printf '%b\n' "${YELLOW}[OK] No se reproducira automaticamente${NC}"
                     url="$BASE_URL/$slug/$capitulo/"
-                    curl -s -b "$COOKIE_FILE" -A "$USER_AGENT" "$url" > "$TEMP_DIR/anime.html"
+                    wget -q --load-cookies="$COOKIE_FILE" --user-agent="$USER_AGENT" \
+                         -O "$TEMP_DIR/anime.html" "$url" 2>/dev/null
 
                     if [ $? -ne 0 ]; then
-                        echo -e "${RED}Error al descargar la página${NC}"
+                        printf '%b\n' "${RED}Error al descargar la pagina${NC}"
                         return 1
                     fi
 
-                    echo -e "${YELLOW}Extrayendo servidores...${NC}"
+                    printf '%b\n' "${YELLOW}Extrayendo servidores...${NC}"
                     "$BASE_DIR/modules/servers.sh"
 
                     echo ""
                     echo "Puedes consultar los servidores manualmente:"
-                    echo -e "${CYAN}cat $TEMP_DIR/servers.json | jq .${NC}"
+                    printf '%b\n' "${CYAN}cat $TEMP_DIR/servers.json | jq .${NC}"
                     echo ""
                 fi
 
                 echo ""
-                echo -n "¿Ver otro capítulo de $titulo? (s/n): "
+                printf '%s' "Ver otro capitulo de $titulo? (s/n): "
                 read respuesta
                 if [[ ! "$respuesta" =~ ^[Ss]$ ]]; then
                     return 0
@@ -212,7 +224,7 @@ eliminarTemporales() {
     rm -rf "$TEMP_DIR" 2>/dev/null
     mkdir -p "$TEMP_DIR"
 
-    echo -e "${YELLOW}Archivos Temporales Eliminados${NC}"
+    printf '%b\n' "${YELLOW}Archivos temporales eliminados${NC}"
     sleep 1
 }
 
@@ -222,34 +234,35 @@ play_with_mpv() {
     local m3u8_url="$3"
 
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${YELLOW}INICIANDO REPRODUCCION${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    hr
+    printf '%b\n' "${YELLOW}INICIANDO REPRODUCCION${NC}"
+    hr
     echo ""
-    echo -e "${GREEN}Reproduciendo: $titulo - Capítulo $capitulo${NC}"
-    echo -e "${YELLOW}Controles MPV:${NC}"
-    echo -e "${YELLOW}   q = Salir | f = Pantalla completa${NC}"
-    echo -e "${YELLOW}   ← → = Navegar 10 segundos${NC}"
-    echo -e "${YELLOW}   ↑ ↓ = Volumen${NC}"
-    echo -e "${BLUE}──────────────────────────────────${NC}"
+    printf '%b\n' "${GREEN}Reproduciendo: $titulo - Capitulo $capitulo${NC}"
+    printf '%b\n' "${YELLOW}Controles MPV:${NC}"
+    printf '%b\n' "${YELLOW}   q = Salir | f = Pantalla completa${NC}"
+    printf '%b\n' "${YELLOW}   <- -> = Navegar 10 segundos${NC}"
+    printf '%b\n' "${YELLOW}   ^  v  = Volumen${NC}"
+    printf '%s\n' "----------------------------------"
 
     sleep 1
 
     if command -v mpv &> /dev/null; then
         mpv --referrer="$BASE_URL" \
             --user-agent="$USER_AGENT" \
-            --force-media-title="$titulo - Capítulo $capitulo" \
+            --force-media-title="$titulo - Capitulo $capitulo" \
             --no-osc \
             --volume=70 \
             "$m3u8_url"
     else
-        echo -e "${RED}MPV no está instalado${NC}"
+        printf '%b\n' "${RED}MPV no esta instalado${NC}"
         echo ""
-        echo -e "${YELLOW}Instala MPV:${NC}"
+        printf '%b\n' "${YELLOW}Instala MPV:${NC}"
         echo "  Debian/Ubuntu: sudo apt install mpv"
         echo "  Arch: sudo pacman -S mpv"
+        echo "  Tiny Core: tce-load -wi mpv"
         echo ""
-        echo -e "${YELLOW}URL para reproducir manualmente:${NC}"
+        printf '%b\n' "${YELLOW}URL para reproducir manualmente:${NC}"
         echo "mpv --referrer=\"$BASE_URL\" \"$m3u8_url\""
     fi
 }
@@ -260,28 +273,28 @@ play_with_mplayer() {
     local m3u8_url="$3"
 
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${YELLOW}INICIANDO REPRODUCCION${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    hr
+    printf '%b\n' "${YELLOW}INICIANDO REPRODUCCION${NC}"
+    hr
     echo ""
-    echo -e "${GREEN}Reproduciendo: $titulo - Capítulo $capitulo${NC}"
+    printf '%b\n' "${GREEN}Reproduciendo: $titulo - Capitulo $capitulo${NC}"
 
     sleep 1
 
     if command -v mplayer &> /dev/null; then
         echo ""
-        printf "${YELLOW}▶ Reproduciendo con mplayer (via yt-dlp)...${NC}\n"
+        printf '%b\n' "${YELLOW}> Reproduciendo con mplayer (via yt-dlp)...${NC}"
 
         yt-dlp --add-header "Referer: $BASE_URL" \
         -S "res:480" -o - "$m3u8_url" \
         2>${TEMP_DIR}/ytdlp.log \
-        | mplayer -zoom -vf scale=640:480 -cache 4096 -demuxer lavf \
-		-title "${titulo} - Capitulo ${capitulo}" - \
+        | mplayer -zoom -vf scale=640:480 -cache 6144 -demuxer lavf \
+        -title "${titulo} - Capitulo ${capitulo}" - \
         >${TEMP_DIR}/mplayer.log 2>&1
     else
-        echo -e "${RED}MPlayer no está instalado${NC}"
+        printf '%b\n' "${RED}MPlayer no esta instalado${NC}"
         echo ""
-        echo -e "${YELLOW}URL para reproducir manualmente:${NC}"
+        printf '%b\n' "${YELLOW}URL para reproducir manualmente:${NC}"
         echo "mplayer -zoom -cache 4096 -demuxer lavf -title \"${titulo} - Capitulo ${capitulo}\" -"
     fi
 }
@@ -292,28 +305,29 @@ reproducir_anime() {
     local capitulo="$3"
 
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${YELLOW}PREPARANDO REPRODUCCION${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    hr
+    printf '%b\n' "${YELLOW}PREPARANDO REPRODUCCION${NC}"
+    hr
     echo ""
-    echo -e "${GREEN}Anime: $titulo${NC}"
-    echo -e "${GREEN}Capitulo: $capitulo${NC}"
+    printf '%b\n' "${GREEN}Anime: $titulo${NC}"
+    printf '%b\n' "${GREEN}Capitulo: $capitulo${NC}"
 
     url="$BASE_URL/$slug/$capitulo/"
 
-    echo -e "${YELLOW}Descargando página...${NC}"
-    curl -s -b "$COOKIE_FILE" -A "$USER_AGENT" "$url" > "$TEMP_DIR/anime.html"
+    printf '%b\n' "${YELLOW}Descargando pagina...${NC}"
+    wget -q --load-cookies="$COOKIE_FILE" --user-agent="$USER_AGENT" \
+         -O "$TEMP_DIR/anime.html" "$url" 2>/dev/null
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Error al descargar la página${NC}"
+        printf '%b\n' "${RED}Error al descargar la pagina${NC}"
         return 1
     fi
 
-    echo -e "${YELLOW}Extrayendo servidores...${NC}"
+    printf '%b\n' "${YELLOW}Extrayendo servidores...${NC}"
     "$BASE_DIR/modules/servers.sh"
 
     if [ $? -ne 0 ] || [ ! -f "$TEMP_DIR/servers.json" ]; then
-        echo -e "${RED}Error al extraer servidores${NC}"
+        printf '%b\n' "${RED}Error al extraer servidores${NC}"
         return 1
     fi
 
@@ -324,22 +338,22 @@ reproducir_anime() {
     fi
 
     echo ""
-    echo -e "${YELLOW}Extrayendo video M3U8...${NC}"
+    printf '%b\n' "${YELLOW}Extrayendo video M3U8...${NC}"
     "$BASE_DIR/modules/m3u8.sh" "$primer_servidor"
 
     if [ $? -ne 0 ] || [ ! -f "$TEMP_DIR/stream.m3u8" ] || [ ! -s "$TEMP_DIR/stream.m3u8" ]; then
-        echo -e "${RED}Error al extraer video M3U8${NC}"
+        printf '%b\n' "${RED}Error al extraer video M3U8${NC}"
         return 1
     fi
 
     m3u8_url=$(head -1 "$TEMP_DIR/stream.m3u8")
-    echo -e "${GREEN}URL M3U8 obtenida${NC}"
+    printf '%b\n' "${GREEN}URL M3U8 obtenida${NC}"
 
     echo ""
-    echo -e "${YELLOW}Selecciona reproductor:${NC}"
+    printf '%b\n' "${YELLOW}Selecciona reproductor:${NC}"
     echo "  1. MPlayer (480p)"
     echo "  2. MPV (best)"
-    echo -n "Opcion: "
+    printf '%s' "Opcion: "
     read reproductor
 
     case $reproductor in
@@ -350,7 +364,7 @@ reproducir_anime() {
             play_with_mpv "$titulo" "$capitulo" "$m3u8_url"
             ;;
         *)
-            echo -e "${RED}Opcion invalida, usando MPV por defecto${NC}"
+            printf '%b\n' "${RED}Opcion invalida, usando MPV por defecto${NC}"
             play_with_mpv "$titulo" "$capitulo" "$m3u8_url"
             ;;
     esac
@@ -358,8 +372,8 @@ reproducir_anime() {
     return 0
 }
 
-echo -e "${GREEN}Iniciando Anime CLI...${NC}"
-echo -e "${YELLOW}Cargando configuración...${NC}"
+printf '%b\n' "${GREEN}Iniciando Anime CLI...${NC}"
+printf '%b\n' "${YELLOW}Cargando configuracion...${NC}"
 
 while true; do
     menu_principal
@@ -370,11 +384,11 @@ while true; do
             buscar_anime
             ;;
         2)
-            echo -e "${YELLOW}Opcion disponible para futuras versiones :("
+            printf '%b\n' "${YELLOW}Opcion disponible para futuras versiones :(${NC}"
             ;;
         3)
             echo ""
-            echo -e "${GREEN}¡Hasta luego!${NC}"
+            printf '%b\n' "${GREEN}Hasta luego!${NC}"
             echo ""
             exit 0
             ;;
@@ -382,12 +396,12 @@ while true; do
             eliminarTemporales
             ;;
         *)
-            echo -e "${RED}Opcion invalida${NC}"
+            printf '%b\n' "${RED}Opcion invalida${NC}"
             sleep 1
             ;;
     esac
 
     echo ""
-    echo -n "Presiona Enter para continuar al menú principal..."
+    printf '%s' "Presiona Enter para continuar al menu principal..."
     read
 done

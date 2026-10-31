@@ -2,7 +2,8 @@
 
 # Este script regresa el total de capitulos
 
-source ./modules/config.sh 2>/dev/null || {
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SOURCE_DIR/config.sh" || {
     echo "Error: No se encuentra config.sh"
     exit 1
 }
@@ -24,34 +25,32 @@ fi
 ANIME_ID="$1"
 CHAPTER_NUM="${2:-1}"  # Usar 1 como valor por defecto si no se especifica
 
-# URL específica para el anime (necesaria para el Referer)
-ANIME_URL="$BASE_URL/akuma-no-riddle"  
-
+# URL especifica para el anime (necesaria para el Referer)
+ANIME_URL="$BASE_URL/akuma-no-riddle"
 
 # Mensajes de depuracion para verificar si esta funcionando
-#echo "Obteniendo capítulos para anime ID: $ANIME_ID, capítulo: $CHAPTER_NUM"
+#echo "Obteniendo capitulos para anime ID: $ANIME_ID, capitulo: $CHAPTER_NUM"
 #echo "Token CSRF: ${CSRF_TOKEN:0:10}..."
 #echo "$API_CHAPTERS/$ANIME_ID/$CHAPTER_NUM"
 
-# Ahora hacer la petición AJAX para obtener los episodios
+# Ahora hacer la peticion AJAX para obtener los episodios
+# (wget no soporta -X POST explicito: --post-data ya fuerza POST)
 
-curl -s "$API_CHAPTERS/$ANIME_ID/$CHAPTER_NUM" \
-    -X POST \
-    -H "User-Agent: $USER_AGENT" \
-    -H "Accept: application/json, text/javascript, */*; q=0.01" \
-    -H "Accept-Language: es-MX,es;q=0.8,en-US;q=0.5,en;q=0.3" \
-    -H "Accept-Encoding: gzip, deflate, br, zstd" \
-    -H "Referer: $ANIME_URL" \
-    -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" \
-    -H "Origin: $BASE_URL" \
-    -H "Sec-GPC: 1" \
-    -H "Connection: keep-alive" \
-    -H "Sec-Fetch-Dest: empty" \
-    -H "Sec-Fetch-Mode: cors" \
-    -H "Sec-Fetch-Site: same-origin" \
-    -H "Pragma: no-cache" \
-    -H "Cache-Control: no-cache" \
-    -H "TE: trailers" \
-    -b "$COOKIE_FILE" \
-    --compressed \
-    --data-raw "_token=$CSRF_TOKEN" | jq .total
+wget -q \
+    --load-cookies="$COOKIE_FILE" \
+    --user-agent="$USER_AGENT" \
+    --header="Accept: application/json, text/javascript, */*; q=0.01" \
+    --header="Accept-Language: es-MX,es;q=0.8,en-US;q=0.5,en;q=0.3" \
+    --header="Referer: $ANIME_URL" \
+    --header="Content-Type: application/x-www-form-urlencoded; charset=UTF-8" \
+    --header="Origin: $BASE_URL" \
+    --header="X-Requested-With: XMLHttpRequest" \
+    --header="Sec-GPC: 1" \
+    --header="Sec-Fetch-Dest: empty" \
+    --header="Sec-Fetch-Mode: cors" \
+    --header="Sec-Fetch-Site: same-origin" \
+    --header="Pragma: no-cache" \
+    --header="Cache-Control: no-cache" \
+    --post-data="_token=$CSRF_TOKEN" \
+    -O - "$API_CHAPTERS/$ANIME_ID/$CHAPTER_NUM" \
+    2>/dev/null | jq .total

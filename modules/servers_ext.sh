@@ -4,9 +4,8 @@
 # Fecha: $(date +%Y-%m-%d)
 # Descripcion: Extrae los servidores de video embebidos del sitio web
 
-if [ ! -f "./modules/config.sh" ]; then
-    echo -e "${RED}Error: No se encuentra config.sh${NC}"
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SOURCE_DIR/config.sh" || {
+    echo "Error: No se encuentra config.sh"
     exit 1
-fi
-
-source ./modules/config.sh
+}
