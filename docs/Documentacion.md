@@ -1,6 +1,6 @@
 # Documentación de funcionamiento interno A-CLI
 
-## 📚 Visión General 
+## Visión General 
 
 ```
 A-CLI es un sistema modular donde cada script tiene una responsabilidad única y bien definida
