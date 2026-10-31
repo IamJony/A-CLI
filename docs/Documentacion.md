@@ -28,7 +28,7 @@ A-CLI es un sistema modular donde cada script tiene una responsabilidad única y
 
 
 
-# 🔄 Flujo de Datos entre Módulos
+# Flujo de Datos entre Módulos
 
 ```
 [USUARIO] → "one piece"
