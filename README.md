@@ -12,7 +12,7 @@ Un bash script para ver animes sub español desde tu terminal usando mpv o mplay
 ---
 
 ## Dependencias
-1. mpv
+1. mpv o mplayer
 2. curl
 3. grep
 4. jq
