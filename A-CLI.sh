@@ -1,9 +1,6 @@
 #!/bin/bash
 # A-CLI.sh - Interfaz CLI para A-CLI by IamJony
-# Adaptado para Tiny Core Linux: solo ASCII, wget en lugar de curl,
-# printf en lugar de echo -e.
 
-# Locale seguro: Tiny Core suele no tener UTF-8 completo
 export LANG=C
 export LC_ALL=C
 
