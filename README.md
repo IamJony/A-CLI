@@ -17,6 +17,9 @@ Un bash script para ver animes sub español desde tu terminal usando mpv o mplay
 3. grep
 4. jq
 
+## Dependencia opcional
+6. yt-dlp - _solo si vas a reproducir con mplayer_
+
 ---
 
 ## Instalacion
