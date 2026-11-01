@@ -4,7 +4,7 @@ Un bash script para ver animes sub español desde tu terminal usando mpv o mplay
 
 ## ESTADO ACTUAL - A-CLI
 * **Última actualización:** 31-10-2026
-* **Versión:** 1.1
+* **Versión:** 1.0
 * **Compatibilidad:** Verificado y operativo al **31-10-2026**.
 
 
